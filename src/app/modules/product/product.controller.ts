@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import { ProductServices } from "./product.service";
 import productValidationSchema from "./product.validation";
-import { IProduct } from "./product.interface";
 
 const getAllProducts = async (req: Request, res: Response) => {
     try {
         const result = await ProductServices.getAllProductsFromDB();
-        returnRes(res, result, 'Bicycles retrieved successfully')
-    } catch (error) {
-        returnErr(res, error)
+        res.status(200).json({
+            status: true,
+            message: 'Bicycles retrieved successfully',
+            data: result
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            status: false,
+            message: error.message || "Something went wrong",
+            error: error
+        })
     }
 }
 
@@ -17,29 +24,38 @@ const createProduct = async (req: Request, res: Response) => {
         const productData = req.body;
         const parseData = productValidationSchema.parse(productData);
         const result = await ProductServices.createProductsIntoDB(parseData);
-        returnRes(res, result, 'Bicycle created successfully')
-    } catch (error) {
-        returnErr(res, error)
+        res.status(200).json({
+            success: true,
+            message: 'Bicycle created successfully',
+            data: result
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            status: false,
+            message: error.message || "Something went wrong",
+            error: error
+        })
+    }
+}
+const getSingleProduct = async (req: Request, res: Response) => {
+    try {
+        const productId = req.params.productId;
+        const result = await ProductServices.getSingleProductFromDB(productId);
+        res.status(200).json({
+            status: true,
+            message: 'Bicycles retrieved successfully',
+            data: result
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            status: false,
+            message: error.message || "Something went wrong",
+            error: error
+        })
     }
 }
 export const ProductControllers = {
     getAllProducts,
-    createProduct
-}
-
-
-const returnErr = (res: Response, error: any) => {
-    return res.status(500).json({
-        status: false,
-        message: error.message || "Something went wrong",
-        error: error
-    })
-}
-
-const returnRes = (res: Response, result: any, message: string) => {
-    return res.status(200).json({
-        status: true,
-        message,
-        data: result
-    })
+    createProduct,
+    getSingleProduct
 }
