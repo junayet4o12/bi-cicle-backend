@@ -33,22 +33,8 @@ const productSchema = new mongoose.Schema<IProduct>({
         type: Boolean,
         required: [true, "Stock status is required."],
         default: true
-    },
-    createdAt: {
-        type: Number,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Number,
     }
-});
-
-productSchema.pre('save', function (next) {
-    if (!this.isNew) {
-        this.updatedAt = new Date();
-    }
-    next();
-});
+}, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 

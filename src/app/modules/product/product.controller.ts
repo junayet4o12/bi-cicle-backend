@@ -54,8 +54,29 @@ const getSingleProduct = async (req: Request, res: Response) => {
         })
     }
 }
+const updateSingleProduct = async (req: Request, res: Response) => {
+    try {
+        const { productId } = req.params;
+        const data = req.body;
+        const partialProductValidationSchema = productValidationSchema.partial();
+        const validatedData = partialProductValidationSchema.parse(data);
+        const result = await ProductServices.updateSingleProductOfDB({ productId, data: validatedData })
+        res.status(200).json({
+            status: true,
+            message: 'Bicycle updated successfully',
+            data: result
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            status: false,
+            message: error.message || "Something went wrong",
+            error: error
+        })
+    }
+}
 export const ProductControllers = {
     getAllProducts,
     createProduct,
-    getSingleProduct
+    getSingleProduct,
+    updateSingleProduct
 }

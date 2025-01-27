@@ -11,7 +11,5 @@ const productValidationSchema = z.object({
     description: z.string({ required_error: "Description is required" }).max(500, "Description must not exceed 500 characters"),
     quantity: z.number({ required_error: "Quantity is required" }).min(0, "Quantity must be a non-negative number"),
     isStock: z.boolean({ required_error: "Stock status is required" }).default(true),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
 });
 export default productValidationSchema

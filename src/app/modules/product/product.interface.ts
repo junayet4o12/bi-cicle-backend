@@ -6,6 +6,4 @@ export interface IProduct {
     description: string;
     quantity: number;
     isStock: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
