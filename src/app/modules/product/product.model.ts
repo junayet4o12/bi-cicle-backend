@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema<IProduct>({
 
 productSchema.pre('save', function (next) {
     if (!this.isNew) {
-        this.updatedAt = Date.now();
+        this.updatedAt = new Date();
     }
     next();
 });
