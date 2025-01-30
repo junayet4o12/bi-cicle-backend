@@ -39,7 +39,7 @@ Before running this project, make sure you have the following installed:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/junayet4o12/bi-cicle-backend
+git clone https://github.com/junayet4o12/bi-cicle-backend.git
 cd bi-cicle-backend
 ```
 
