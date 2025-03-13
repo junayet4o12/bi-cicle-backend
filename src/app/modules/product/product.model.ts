@@ -5,60 +5,91 @@ const productSchema = new mongoose.Schema<IProduct>({
     name: {
         type: String,
         trim: true,
-        required: [true, "Product name is required."]
+        required: true
     },
     brand: {
         type: String,
         trim: true,
-        required: [true, "Brand is required."]
+        required: true
     },
     price: {
         type: Number,
-        required: [true, "Price is required."]
+        required: true
     },
-    type: {
+    category: {
         type: String,
         enum: ['Mountain', 'Road', 'Hybrid', 'BMX', 'Electric'],
-        required: [true, "Product type is required."]
+        required: true
     },
-    description: {
+    frameMaterial: {
         type: String,
-        required: [true, "Description is required."]
+        enum: ['Aluminum', 'Carbon', 'Steel', 'Titanium'],
+        required: true
+    },
+    wheelSize: {
+        type: Number,
+        required: true
     },
     quantity: {
         type: Number,
-        required: [true, "Quantity is required."]
+        required: true
     },
-    isStock: {
-        type: Boolean,
-        required: [true, "Stock status is required."],
-        default: true
+    description: {
+        type: String,
+        required: true
     },
+    images: {
+        type: [String],
+        validate: {
+            validator: (value: string[]) => value.length > 0,
+            message: "At least one image is required."
+        },
+        required: true
+    },
+    specifications: [
+        {
+            key: {
+                type: String,
+                required: true
+            },
+            value: {
+                type: String,
+                required: true
+            }
+        }
+    ],
     isDeleted: {
         type: Boolean,
         default: false
     }
 }, { timestamps: true });
 
-
-productSchema.pre("find", async function (next) {
-    this.find({ isDeleted: { $ne: true } });
-    next();
+// Automatically set `isStock` based on quantity
+productSchema.virtual('isStock').get(function (this: IProduct) {
+    return this.quantity > 0;
 });
 
-productSchema.pre("findOne", async function (next) {
-    this.find({ isDeleted: { $ne: true } });
-    next();
-});
-productSchema.pre("findOneAndUpdate", async function (next) {
+// Middleware to exclude deleted products from queries
+productSchema.pre("find", function (next) {
     this.where({ isDeleted: { $ne: true } });
     next();
+});
 
-})
-productSchema.pre("aggregate", async function (next) {
+productSchema.pre("findOne", function (next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
+
+productSchema.pre("findOneAndUpdate", function (next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
+
+productSchema.pre("aggregate", function (next) {
     this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
     next();
 });
-const Product = mongoose.model('Product', productSchema);
+
+const Product = mongoose.model<IProduct>('Product', productSchema);
 
 export default Product;

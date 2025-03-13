@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ProductServices } from "./product.service";
-import productValidationSchema from "./product.validation";
+import { ProductValidations } from "./product.validation";
 
 const getAllProducts = async (req: Request, res: Response) => {
     try {
@@ -30,7 +30,7 @@ const getAllProducts = async (req: Request, res: Response) => {
 const createProduct = async (req: Request, res: Response) => {
     try {
         const productData = req.body;
-        const parseData = productValidationSchema.parse(productData);
+        const parseData = ProductValidations.createProductValidationSchema.parse(productData);
         const result = await ProductServices.createProductsIntoDB(parseData);
         if (result) {
             res.status(200).json({
@@ -85,7 +85,7 @@ const updateSingleProduct = async (req: Request, res: Response) => {
         const { productId } = req.params;
         const data = req.body;
         const { isDeleted, ...filteredData } = data;
-        const partialProductValidationSchema = productValidationSchema.partial();
+        const partialProductValidationSchema = ProductValidations.createProductValidationSchema.partial();
         const validatedData = partialProductValidationSchema.parse(filteredData);
         const result = await ProductServices.updateSingleProductOfDB({
             productId,

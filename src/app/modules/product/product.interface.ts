@@ -1,10 +1,18 @@
+export type TSpecification = {
+    key: string;
+    value: string;
+}
+
 export interface IProduct {
     name: string;
     brand: string;
     price: number;
-    type: 'Mountain' | 'Road' | 'Hybrid' | 'BMX' | 'Electric';
-    description: string;
+    category: 'Mountain' | 'Road' | 'Hybrid' | 'BMX' | 'Electric';
+    frameMaterial: 'Aluminum' | 'Carbon' | 'Steel' | 'Titanium';
+    wheelSize: number;
     quantity: number;
-    isStock: boolean;
+    description: string;
+    images: string[];
+    specifications: TSpecification[];
     isDeleted?: boolean;
 }
