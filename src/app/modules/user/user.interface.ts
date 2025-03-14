@@ -8,11 +8,11 @@ export interface IUser {
     email: string;
     password: string;
     role: TUserRole;
-    profile: string;
-    address: string;
+    profile?: string;
+    address?: string;
     contactNumber: string;
-    isBlock: boolean;
-    passwordChangedAt: Date;
+    isBlock?: boolean;
+    passwordChangedAt?: Date;
 }
 
 export interface IUserCheckingOptions {
