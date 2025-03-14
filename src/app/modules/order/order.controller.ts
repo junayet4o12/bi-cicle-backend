@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { orderServices } from "./order.service";
-import orderValidationSchema from "./order.validation";
 import Product from "../product/product.model";
 import { IOrder } from "./order.interface";
 import { IProduct } from "../product/product.interface";
@@ -8,8 +7,7 @@ import { IProduct } from "../product/product.interface";
 const createOrder = async (req: Request, res: Response) => {
     try {
         const orderData: IOrder = req.body;
-        const parseData = orderValidationSchema.parse(orderData);
-        const product = parseData.product;
+        const product = orderData.product;
         const checkProduct: IProduct | null = await Product.findById(product);
         if (!checkProduct) {
             res.status(404).json({
@@ -18,7 +16,7 @@ const createOrder = async (req: Request, res: Response) => {
                 data: checkProduct,
             })
         } else {
-            const isProductOutOfStockStock = !checkProduct.isStock || checkProduct.quantity < parseData.quantity;
+            const isProductOutOfStockStock = checkProduct.quantity < orderData.quantity;
             if (isProductOutOfStockStock) {
                 res.status(400).json({
                     success: false,
@@ -27,14 +25,14 @@ const createOrder = async (req: Request, res: Response) => {
             } else {
 
                 try {
-                    const updatedQuantity = checkProduct.quantity - parseData.quantity;
+                    const updatedQuantity = checkProduct.quantity - orderData.quantity;
                     const isStock = updatedQuantity > 0;
-                    const totalPrice = checkProduct.price * parseData.quantity;
+                    const totalPrice = checkProduct.price * orderData.quantity;
                     await Product.findByIdAndUpdate(
                         product,
                         { quantity: updatedQuantity, isStock }
                     );
-                    const result = await orderServices.createOrderIntoDB({ ...parseData, totalPrice, });
+                    const result = await orderServices.createOrderIntoDB({ ...orderData, totalPrice, });
 
                     if (result) {
 
