@@ -1,12 +1,15 @@
+import QueryBuilder from "../../builder/QueryBuilder";
 import { IProduct } from "./product.interface";
 import Product from "./product.model"
 type TUpdatedProduct = {
     productId: string;
     data: object
 }
-const getAllProductsFromDB = async () => {
-    const result = await Product.find();
-    return result
+const getAllProductsFromDB = async (query: Record<string, unknown>) => {
+    const productQuery = new QueryBuilder(Product.find(), query).fields().filter().paginate().search(['name', 'description', 'category'])
+    const result = await productQuery.modelQuery;
+    const meta = await productQuery.countTotal();
+    return { meta, result }
 }
 const createProductsIntoDB = async (productData: IProduct) => {
     const result = Product.create(productData);

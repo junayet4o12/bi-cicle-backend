@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { IProduct } from './product.interface';
+import { categories, frameMaterials } from './product.const';
 
 const productSchema = new mongoose.Schema<IProduct>({
     name: {
@@ -18,12 +19,12 @@ const productSchema = new mongoose.Schema<IProduct>({
     },
     category: {
         type: String,
-        enum: ['Mountain', 'Road', 'Hybrid', 'BMX', 'Electric'],
+        enum: categories,
         required: true
     },
     frameMaterial: {
         type: String,
-        enum: ['Aluminum', 'Carbon', 'Steel', 'Titanium'],
+        enum: frameMaterials,
         required: true
     },
     wheelSize: {

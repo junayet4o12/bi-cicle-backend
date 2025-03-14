@@ -4,12 +4,14 @@ import { ProductServices } from "./product.service";
 import sendResponse from "../../utils/sendResponse";
 
 const getAllProducts = async (req: Request, res: Response) => {
-    const result = await ProductServices.getAllProductsFromDB();
+    const query = req.query
+    const result = await ProductServices.getAllProductsFromDB(query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Bicycles retrieved successfully",
-        data: result
+        data: result.result,
+        meta: result.meta
     });
 };
 
