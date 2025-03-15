@@ -75,7 +75,7 @@ userSchema.statics.checkingUser = async function (
     let returningData: IReturningData = {};
 
     if (typeof payload === 'string') {
-        const user = await User.findOne({ id: payload }).select('+password');
+        const user = await User.findOne({ email: payload }).select('+password');
 
         if (!user) {
             throw new AppError(httpStatus.NOT_FOUND, 'User not found');
