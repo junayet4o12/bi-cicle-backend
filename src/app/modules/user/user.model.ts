@@ -19,7 +19,8 @@ const userSchema = new Schema<IUser, IUserModel>({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: 0
     },
     profile: {
         type: String,

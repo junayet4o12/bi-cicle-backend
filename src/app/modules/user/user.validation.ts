@@ -26,15 +26,9 @@ const updateUserValidationSchema = z.object({
         })
 })
 
-const changeUserPasswordValidationSchema = z.object({
-    body: z.object({
-        email: z.string({ required_error: 'User email is required!' }).trim().email({ message: 'Use a valid Email' }),
-        password: z.string({ required_error: 'Password is required!' }),
-    })
-})
+
 
 export const UserValidations = {
     createUserValidationSchema,
     updateUserValidationSchema,
-    changeUserPasswordValidationSchema
 }
