@@ -1,11 +1,20 @@
 import httpStatus from 'http-status';
 import AppError from "../../errors/AppError";
 import Product from "../product/product.model";
-import { IOrder } from "./order.interface";
+import { IOrder, TOrderStatus } from "./order.interface";
 import Order from "./order.model";
 import mongoose, { startSession, Types } from 'mongoose';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { TUserRole } from '../user/user.interface';
+import { User } from '../user/user.model';
 
-const createOrderIntoDB = async (orderData: IOrder) => {
+const createOrderIntoDB = async (userData: { email: string; role: TUserRole }, orderData: IOrder) => {
+    const userId = await User.findOne(userData).select({ _id: 1 }).lean();
+
+    if (!userId?._id) {
+        throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
+    }
+    orderData.user = userId?._id
     const products = orderData.products
     const productsId = products.map(item => item.product);
     const productsData = await Product.find({ _id: { $in: productsId } });
@@ -73,7 +82,7 @@ const createOrderIntoDB = async (orderData: IOrder) => {
 }
 const calculateRevenueFromDB = async () => {
     const result = await Order.aggregate([
-        
+
         {
             $unwind: '$products'
         },
@@ -109,7 +118,62 @@ const calculateRevenueFromDB = async () => {
 
     return result[0]
 }
+const getAllProductsFromDB = async (query: Record<string, unknown>) => {
+    const orderQuery = new QueryBuilder(Order.find(), query).fields().filter().paginate().sort();
+    const result = await orderQuery.modelQuery.populate('user').populate('products.product');
+    const meta = await orderQuery.countTotal();
+    return {
+        result,
+        meta
+    }
+}
+const getAllSingleProductFromDB = async (id: string) => {
+    const result = await Order.findById(id).populate('user').populate('products.product');
+    return result
+}
+const updateProductIntoDB = async (id: string, payload: Partial<Pick<IOrder, 'address' | 'payment'>>) => {
+    const result = await Order.findByIdAndUpdate(id, payload, { new: true });
+    return result
+}
+const updateOrderStatus = async (id: string, payload: { status: TOrderStatus }) => {
+    const result = await Order.findByIdAndUpdate(id, payload, { new: true });
+    return result
+}
+
+const deleteOrderFromDB = async (id: string) => {
+    const orderData = await Order.findById(id);
+
+    if (!orderData) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Order not found!')
+    }
+
+    const products = orderData.products;
+    const session = await startSession();
+    session.startTransaction();
+    try {
+        for (let item of products) {
+            await Product.findByIdAndUpdate(item.product, {
+                $inc: { quantity: item.quantity }
+            }, { session })
+        }
+        await Order.findByIdAndDelete(id, { session })
+        await session.commitTransaction();
+        session.endSession();
+
+    } catch (error: any) {
+        // Rollback transaction if anything fails
+        await session.abortTransaction();
+        session.endSession();
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, `Order creation failed: ${error.message}`);
+    }
+}
+
 export const OrderServices = {
     createOrderIntoDB,
-    calculateRevenueFromDB
+    calculateRevenueFromDB,
+    getAllProductsFromDB,
+    getAllSingleProductFromDB,
+    updateProductIntoDB,
+    updateOrderStatus,
+    deleteOrderFromDB
 }

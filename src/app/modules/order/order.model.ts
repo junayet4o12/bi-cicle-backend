@@ -20,7 +20,7 @@ const productSchema = new Schema(
 
 const orderSchema = new Schema<IOrder>(
     {
-        userId: {
+        user: {
             type: Schema.Types.ObjectId,
             ref: 'User',
             required: true,

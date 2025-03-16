@@ -3,7 +3,6 @@ import { order_status } from './order.const';
 
 const createOrderValidationSchema = z.object({
     body: z.object({
-        userId: z.string().length(24, "User ID must be a valid MongoDB ObjectId"),
         products: z.array(
             z.object({
                 product: z.string().length(24, "Product ID must be a valid MongoDB ObjectId"), // Assuming product is also a MongoDB ObjectId
