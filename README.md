@@ -1,32 +1,58 @@
 # 🚴 Bi-Cycle Store Backend
 
 ## 📌 Overview
-Bi-Cycle Store Backend is a backend application built with **Express.js and TypeScript**, integrating **MongoDB with Mongoose** to manage a bicycle store. The API allows users to perform CRUD operations on **bicycles** and **orders**, ensuring data integrity with Mongoose schema validation.
+Bi-Cycle Store Backend is a backend application built with **Express.js and TypeScript**, integrating **MongoDB with Mongoose** to manage a bicycle store. The API implements user authentication and authorization with role-based access control for administrators and regular users.
 
 ## 🌐 Live API Testing
 Test the API endpoints using the deployed version:
 ```
 https://bi-cicle-backend.vercel.app/
 ```
+
 ## 🛠️ Features
+- ✅ **User Management** – Register, login, and manage user accounts
+- ✅ **Authentication** – JWT-based authentication with access & refresh tokens
+- ✅ **Role-Based Access Control** – Different permissions for admin and user roles
 - ✅ **Product Management** – Add, view, update, and delete bicycles
-- ✅ **Order Management** – Place orders and update inventory automatically
-- ✅ **Search & Filter** – Retrieve bicycles based on name, brand, or type
+- ✅ **Order Management** – Place, view, and manage orders
 - ✅ **Revenue Calculation** – Compute total revenue from all orders
-- ✅ **Error Handling** – Standardized error responses for validation and resource handling
+- ✅ **Password Management** – Change, forget, and reset password functionality
+- ✅ **Cloud Storage** – Integration with cloud services for image storage
+- ✅ **Validation** – Request validation using middleware
 
 ## 🎯 API Endpoints
 
-### 🔹 Bicycles
-* **POST** `/api/products` – Create a bicycle
-* **GET** `/api/products` – Get all bicycles (search & filter supported)
-* **GET** `/api/products/:productId` – Get a specific bicycle
-* **PUT** `/api/products/:productId` – Update a bicycle
-* **DELETE** `/api/products/:productId` – Delete a bicycle
+### 🔹 Authentication
+* **POST** `/api/auth/login` – User login
+* **POST** `/api/auth/change-password` – Change user password (authenticated)
+* **POST** `/api/auth/refresh-token` – Obtain new access token using refresh token
+* **POST** `/api/auth/forget-password` – Request password reset
+* **POST** `/api/auth/reset-password` – Reset password with token
+
+### 🔹 Users
+* **POST** `/api/users` – Create a new user
+* **GET** `/api/users` – Get all users (admin only)
+* **GET** `/api/users/me` – Get current user profile
+* **GET** `/api/users/:id` – Get a specific user (admin only)
+* **PATCH** `/api/users/me` – Update current user profile
+* **PATCH** `/api/users/:id` – Update a user (admin only)
+* **PATCH** `/api/users/:id/toggle-state` – Enable/disable a user (admin only)
+
+### 🔹 Products
+* **GET** `/api/products` – Get all products
+* **POST** `/api/products` – Create a product (admin only)
+* **GET** `/api/products/:productId` – Get a specific product
+* **PATCH** `/api/products/:productId` – Update a product (admin only)
+* **DELETE** `/api/products/:productId` – Delete a product (admin only)
 
 ### 🔹 Orders
-* **POST** `/api/orders` – Place an order & update stock
-* **GET** `/api/orders/revenue` – Calculate total revenue
+* **POST** `/api/orders` – Create an order (admin only)
+* **GET** `/api/orders` – Get all orders (admin only)
+* **GET** `/api/orders/revenue` – Calculate total revenue (admin only)
+* **GET** `/api/orders/:orderId` – Get a specific order (admin/user)
+* **PATCH** `/api/orders/:orderId` – Update an order (admin only)
+* **PATCH** `/api/orders/status/:orderId` – Update order status (admin only)
+* **DELETE** `/api/orders/:orderId` – Delete an order (admin only)
 
 ## Prerequisites
 
@@ -55,6 +81,17 @@ Create a `.env` file in the root directory with the following variables:
 NODE_ENV=development
 PORT=5000
 DB_URL=your_mongodb_connection_string
+BCRYPT_SALT_ROUNDS=12
+DEFAULT_PASS=your_default_password
+JWT_ACCESS_SECRET=your_access_token_secret
+JWT_REFRESH_SECRET=your_refresh_token_secret
+JWT_ACCESS_EXPIRES_IN=1d
+JWT_REFRESH_EXPIRES_IN=365d
+RESET_PASSWORD_UI_LINK=http://your-frontend-url.com
+CLOUD_NAME=your_cloudinary_name
+CLOUD_API_KEY=your_cloudinary_api_key
+CLOUD_API_SECRET=your_cloudinary_api_secret
+SUPER_ADMIN_DEFAULT_PASS=your_admin_default_password
 ```
 
 ## Available Scripts
@@ -88,7 +125,19 @@ npm run lint:fix   # Fix automatic linting issues
 ```
 bi-cycle-store-backend/
 ├── src/
-│   └── server.ts
+│   ├── app.ts
+│   ├── server.ts
+│   ├── config/
+│   ├── interfaces/
+│   ├── middlewares/
+│   │   ├── auth.ts
+│   │   └── validateRequest.ts
+│   ├── modules/
+│   │   ├── auth/
+│   │   ├── order/
+│   │   ├── product/
+│   │   └── user/
+│   └── routes/
 ├── dist/
 ├── .env
 ├── .eslintrc
@@ -103,9 +152,19 @@ bi-cycle-store-backend/
 - Express.js
 - TypeScript
 - MongoDB with Mongoose
-- Zod (Schema validation)
+- JWT (Authentication)
 - bcrypt (Password hashing)
+- Zod (Schema validation)
+- Cloudinary (Image storage)
 - ESLint (Code linting)
+
+## Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Role-based access control
+- Request validation
+- Password reset flow
 
 ## Security Note
 
@@ -113,6 +172,8 @@ For security reasons, it's recommended to:
 - Never commit the `.env` file to version control
 - Use environment-specific configuration for different deployment environments
 - Regularly update dependencies to patch security vulnerabilities
+- Use strong, unique secrets for JWT tokens
+- Implement rate limiting for authentication endpoints
 
 ## Development
 
