@@ -1,34 +1,79 @@
 import { model, Schema } from "mongoose";
 import { IOrder } from "./order.interface";
+import { order_status } from './order.const';
+import { calculateTotalPrice } from "../../utils/calculateTotalPrice";
 
-const orderSchema = new Schema<IOrder>(
+const productSchema = new Schema(
     {
-        email: {
-            type: String,
-            required: [true, 'Email is required'],
-            trim: true,
-            lowercase: true
-        },
         product: {
-            type: String,
-            required: [true, 'Product identifier is required'],
-            trim: true
+            type: Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true,
         },
         quantity: {
             type: Number,
-            required: [true, 'Quantity is required'],
-            min: [1, 'Quantity must be at least 1']
+            min: [1, 'Quantity must be at least 1'],
         },
-        totalPrice: {
+    },
+    { _id: false }
+);
+
+const orderSchema = new Schema<IOrder>(
+    {
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        products: {
+            type: [productSchema],
+            validate: {
+                validator: (value: any[]) => value.length > 0,
+                message: 'At least one product must be provided',
+            },
+        },
+        status: {
+            type: String,
+            enum: Object.keys(order_status),
+        },
+        payment: {
             type: Number,
-            required: [true, 'Total price is required'],
-            min: [0, 'Total price cannot be negative']
-        }
+            min: [0, 'Payment amount cannot be negative'],
+            required: true
+        },
+        address: {
+            type: String,
+            trim: true,
+        },
     },
     {
-        timestamps: true
+        timestamps: true,
     }
 );
+
+orderSchema.post('find', async function (docs) {
+    for (const doc of docs) {
+        // Calculate total price for each populated order
+        doc.totalPrice = calculateTotalPrice(doc.products);
+        await doc.save(); // Save the updated totalPrice
+    }
+});
+
+orderSchema.post('findOne', async function (doc) {
+    if (doc) {
+        doc.totalPrice = calculateTotalPrice(doc.products);
+        await doc.save();
+    }
+});
+
+// Ensure `totalPrice` is recalculated after findOneAndUpdate, update, and updateMany
+orderSchema.post('findOneAndUpdate', async function (doc) {
+    if (doc) {
+        doc.totalPrice = calculateTotalPrice(doc.products);
+        await doc.save();
+    }
+});
+
 const Order = model<IOrder>('Order', orderSchema);
 
 export default Order;

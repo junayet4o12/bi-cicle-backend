@@ -2,8 +2,9 @@ import httpStatus from 'http-status';
 import { Request, Response } from "express";
 import { ProductServices } from "./product.service";
 import sendResponse from "../../utils/sendResponse";
+import catchAsync from '../../utils/catchAsync';
 
-const getAllProducts = async (req: Request, res: Response) => {
+const getAllProducts = catchAsync(async (req: Request, res: Response) => {
     const query = req.query
     const result = await ProductServices.getAllProductsFromDB(query);
     sendResponse(res, {
@@ -13,9 +14,9 @@ const getAllProducts = async (req: Request, res: Response) => {
         data: result.result,
         meta: result.meta
     });
-};
+})
 
-const createProduct = async (req: Request, res: Response) => {
+const createProduct = catchAsync(async (req: Request, res: Response) => {
     const productData = req.body;
     const result = await ProductServices.createProductsIntoDB(productData);
     sendResponse(res, {
@@ -24,9 +25,9 @@ const createProduct = async (req: Request, res: Response) => {
         message: "Product created successfully",
         data: result
     });
-};
+})
 
-const getSingleProduct = async (req: Request, res: Response) => {
+const getSingleProduct = catchAsync(async (req: Request, res: Response) => {
     const productId = req.params.productId;
     const result = await ProductServices.getSingleProductFromDB(productId);
     sendResponse(res, {
@@ -35,9 +36,9 @@ const getSingleProduct = async (req: Request, res: Response) => {
         message: "Bicycle retrieved successfully",
         data: result
     });
-};
+});
 
-const updateSingleProduct = async (req: Request, res: Response) => {
+const updateSingleProduct = catchAsync(async (req: Request, res: Response) => {
     const { productId } = req.params;
     const data = req.body;
     const { isDeleted, ...filteredData } = data;
@@ -51,9 +52,9 @@ const updateSingleProduct = async (req: Request, res: Response) => {
         message: "Bicycle updated successfully",
         data: result
     });
-};
+});
 
-const deleteSingleProduct = async (req: Request, res: Response) => {
+const deleteSingleProduct = catchAsync(async (req: Request, res: Response) => {
     const { productId } = req.params;
     await ProductServices.deleteSingleProductFromDB(productId);
     sendResponse(res, {
@@ -62,7 +63,7 @@ const deleteSingleProduct = async (req: Request, res: Response) => {
         message: "Bicycle deleted successfully",
         data: {}
     });
-};
+});
 
 export const ProductControllers = {
     getAllProducts,

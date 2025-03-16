@@ -1,41 +1,44 @@
-import { z } from "zod";
+import { z } from 'zod';
+import { order_status } from './order.const';
 
-const orderValidationSchema = z.object({
+const createOrderValidationSchema = z.object({
     body: z.object({
-        email: z.string({
-            required_error: "Email is required",
-            invalid_type_error: "Email must be a string"
-        })
-            .trim()
-            .min(1, { message: "Email cannot be empty" })
-            .email({ message: "Invalid email format" })
-            .toLowerCase(),
-
-        product: z.string({
-            required_error: "Product identifier is required",
-            invalid_type_error: "Product identifier must be a string"
-        })
-            .trim()
-            .min(1, { message: "Product identifier cannot be empty" })
-            .max(100, { message: "Product identifier is too long" }),
-
-        quantity: z.number({
-            required_error: "Quantity is required",
-            invalid_type_error: "Quantity must be a number"
-        })
-            .int({ message: "Quantity must be a whole number" })
-            .positive({ message: "Quantity must be positive" })
-            .default(1),
-
-        totalPrice: z.number({
-            invalid_type_error: "Total price must be a number"
-        })
-            .positive({ message: "Total price must be positive" })
-            .transform(val => Number(val.toFixed(2)))
-            .optional()
-    })
+        userId: z.string().length(24, "User ID must be a valid MongoDB ObjectId"),
+        products: z.array(
+            z.object({
+                product: z.string().length(24, "Product ID must be a valid MongoDB ObjectId"), // Assuming product is also a MongoDB ObjectId
+                quantity: z.number().min(1, 'Quantity must be at least 1'),
+            })
+        ).nonempty('At least one product must be provided'),
+        status: z.enum(Object.keys(order_status) as [keyof typeof order_status], {
+            invalid_type_error: `Status must be one of ${Object.keys(order_status).join(', ')}`,
+        }).default('PENDING').optional(),
+        payment: z.number().min(0, 'Payment amount cannot be negative'),
+        address: z.string().trim().min(5, 'Address must be at least 5 characters long'),
+    }),
 });
 
-// Type inference from the schema
+const updateOrderValidationSchema = z.object({
+    body: z.object({
+        payment: z.number().min(0, 'Payment amount cannot be negative').optional(),
+        address: z.string().trim().min(5, 'Address must be at least 5 characters long').optional(),
+    })
+        .partial()
+        .refine((data) => Object.keys(data).length > 0, {
+            message: "At least one field must be provided for update",
+        })
+});
 
-export default orderValidationSchema;
+const changeStatusValidationSchema = z.object({
+    body: z.object({
+        status: z.enum(Object.keys(order_status) as [keyof typeof order_status], {
+            invalid_type_error: `Status must be one of ${Object.keys(order_status).join(', ')}`,
+        }),
+    }),
+});
+
+export const OrderValidations = {
+    createOrderValidationSchema,
+    updateOrderValidationSchema,
+    changeStatusValidationSchema
+};
