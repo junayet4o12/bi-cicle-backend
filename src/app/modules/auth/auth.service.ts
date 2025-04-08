@@ -105,9 +105,10 @@ const forgetPassword = async (email: string) => {
         email: userData?.email as string,
         role: userData?.role as TUserRole
     }
-    const resetToken = createToken(jwtPayload, config.jwt_access_secret as string, '10m')
+    const resetToken = createToken(jwtPayload, config.jwt_access_secret as string, '600s')
 
     const resetUILink = `${config.reset_pass_ui_link}?email=${userData?.email}&token=${resetToken}`
+
     sendEmail(userData?.email as string, resetUILink)
 }
 
@@ -132,9 +133,16 @@ const resetPassword = async (payload: {
     if (email !== payload.email) {
         throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!')
     }
-    
+
+
+
+    if (!decoded || !decoded.exp) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid token');
+    }
+
+    // Manual expiration check
     const newHashedPassword = await bcrypt.hash(payload.newPassword, Number(config.bcrypt_salt_rounds))
-    
+
     await User.findOneAndUpdate({
         email: email,
         role: role
