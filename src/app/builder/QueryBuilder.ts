@@ -22,7 +22,13 @@ class QueryBuilder<T> {
         return this
     }
     filter() {
-        const { searchTerm, limit, page, fields, sort, ...queryObject } = this.query;
+        const { priceRange, searchTerm, limit, page, fields, sort, ...queryObject } = this.query;
+        if (priceRange && typeof priceRange === 'string') {
+            const [min, max] = priceRange.split('-').map(Number);
+            if (!isNaN(min) && !isNaN(max)) {
+                queryObject['price'] = { $gte: min, $lte: max };
+            }
+        }
         this.modelQuery = this.modelQuery.find(queryObject);
         return this
     };

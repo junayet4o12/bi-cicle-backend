@@ -6,7 +6,7 @@ type TUpdatedProduct = {
     data: object
 }
 const getAllProductsFromDB = async (query: Record<string, unknown>) => {
-    const productQuery = new QueryBuilder(Product.find(), query).fields().filter().paginate().search(['name', 'description', 'category'])
+    const productQuery = new QueryBuilder(Product.find(), query).fields().filter().paginate().search(['name', 'description', 'category']).sort()
     const result = await productQuery.modelQuery;
     const meta = await productQuery.countTotal();
     return { meta, result }
@@ -20,7 +20,9 @@ const getSingleProductFromDB = async (productId: string) => {
     return result
 }
 const updateSingleProductOfDB = async ({ productId, data }: TUpdatedProduct) => {
-    const result = await Product.findByIdAndUpdate(productId, data)
+
+    const result = await Product.findByIdAndUpdate(productId, data, { new: true });
+
     return result
 }
 const deleteSingleProductFromDB = async (productId: string) => {

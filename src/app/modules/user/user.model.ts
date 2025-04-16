@@ -24,6 +24,7 @@ const userSchema = new Schema<IUser, IUserModel>({
     },
     profile: {
         type: String,
+        default: ''
     },
     address: {
         type: String,

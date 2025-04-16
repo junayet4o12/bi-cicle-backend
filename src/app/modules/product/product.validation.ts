@@ -21,7 +21,7 @@ const createProductValidationSchema = z.object({
                 key: z.string(),
                 value: z.string(),
             })
-        ),
+        ).optional(),
         isDeleted: z.boolean().default(false).optional(),
     })
 });

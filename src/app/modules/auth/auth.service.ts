@@ -22,7 +22,6 @@ const loginUser = async (payload: ILoginUser) => {
         throw new AppError(httpStatus.FORBIDDEN, 'Wrong Password!')
     }
     const jwtPayload = {
-        name: userData?.name as string,
         email: userData?.email as string,
         role: userData?.role as TUserRole
     }
@@ -49,7 +48,6 @@ const changePassword = async (user: JwtPayload, payload: { newPassword: string; 
 
     const newHashedPassword = await bcrypt.hash(payload.newPassword, Number(config.bcrypt_salt_rounds))
     await User.findOneAndUpdate({
-        name: user.name,
         email: user.email,
         role: user.role
     },
@@ -80,7 +78,6 @@ const refreshToken = async (token: string) => {
     }
 
     const jwtPayload = {
-        name: userData?.name as string,
         email: userData?.email as string,
         role: userData?.role as TUserRole
     }
@@ -101,7 +98,6 @@ const forgetPassword = async (email: string) => {
         throw new AppError(httpStatus.FORBIDDEN, 'User has blocked')
     }
     const jwtPayload = {
-        name: userData?.name as string,
         email: userData?.email as string,
         role: userData?.role as TUserRole
     }

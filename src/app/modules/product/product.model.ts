@@ -47,18 +47,21 @@ const productSchema = new mongoose.Schema<IProduct>({
         },
         required: true
     },
-    specifications: [
-        {
-            key: {
-                type: String,
-                required: true
-            },
-            value: {
-                type: String,
-                required: true
+    specifications: {
+        type: [
+            {
+                key: {
+                    type: String,
+                    required: true
+                },
+                value: {
+                    type: String,
+                    required: true
+                }
             }
-        }
-    ],
+        ],
+        default: []
+    },
     isDeleted: {
         type: Boolean,
         default: false

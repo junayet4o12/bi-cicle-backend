@@ -43,8 +43,8 @@ const getSingleUsers = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "Student data has fetched!", data: result });
 })
 const getMe = catchAsync(async (req, res) => {
-    const { name, email, role } = req.user;
-    const queryData = { name, email, role }
+    const { email, role } = req.user;
+    const queryData = { email, role }
     const result = await UserServices.getMeFromDB(queryData);
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "My data has fetched!", data: result });
 })
@@ -55,8 +55,8 @@ const updateSingleUser = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "User Data has updated", data: result });
 })
 const updateByData = catchAsync(async (req, res) => {
-    const { name, email, role } = req.user;
-    const queryData = { name, email, role }
+    const { email, role } = req.user;
+    const queryData = { email, role }
     const data = req.body
     const result = await UserServices.updateMyDataIntoDB(queryData, data);
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "My data has updated!", data: result });

@@ -14,11 +14,9 @@ const createUserValidationSchema = z.object({
 const updateUserValidationSchema = z.object({
     body: z.object({
         name: z.string().trim(),
-        email: z.string().trim().email({ message: 'Use a valid Email' }).optional(),
-        profile: z.string().url({ message: 'Profile must be a valid url!' }).optional(),
+        profile: z.string().url({ message: 'Profile must be a valid url!' }) .or(z.literal('')).optional(),
         address: z.string().optional(),
         contactNumber: z.string().optional(),
-        isBlock: z.boolean().default(false).optional(),
     })
         .partial()
         .refine((data) => Object.keys(data).length > 0, {

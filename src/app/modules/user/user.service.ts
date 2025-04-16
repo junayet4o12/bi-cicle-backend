@@ -22,7 +22,6 @@ const getSingleUserFromDB = async (id: string) => {
 }
 
 const getMeFromDB = async (query: {
-    name: string;
     email: string;
     role: TUserRole
 }) => {
@@ -36,7 +35,6 @@ const updateSingleUserFromDB = async (id: string, data: Partial<Pick<IUser, 'nam
 }
 
 const updateMyDataIntoDB = async (query: {
-    name: string;
     email: string;
     role: TUserRole
 }, data: Partial<Pick<IUser, 'name' | 'address' | 'contactNumber' | 'profile'>>) => {
