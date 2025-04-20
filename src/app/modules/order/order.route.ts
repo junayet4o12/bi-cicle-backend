@@ -6,7 +6,7 @@ import auth from '../../middlewares/auth';
 
 const router = Router();
 
-router.post('', auth('admin'), validateRequest(OrderValidations.createOrderValidationSchema), OrderControllers.createOrder);
+router.post('', validateRequest(OrderValidations.createOrderValidationSchema), OrderControllers.createOrder);
 router.get('', auth('admin'), OrderControllers.getAllOrders);
 router.get('/revenue', auth('admin'), OrderControllers.calculateTotalRevenue);
 router.get('/:orderId', auth('admin', 'user'), OrderControllers.getSingleOrder);

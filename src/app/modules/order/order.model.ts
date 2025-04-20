@@ -1,9 +1,9 @@
 import { model, Schema } from "mongoose";
-import { IOrder } from "./order.interface";
+import { IOrder, IOrderedProduct } from "./order.interface";
 import { order_status } from './order.const';
 import { calculateTotalPrice } from "../../utils/calculateTotalPrice";
 
-const productSchema = new Schema(
+const productSchema = new Schema<IOrderedProduct>(
     {
         product: {
             type: Schema.Types.ObjectId,
@@ -14,17 +14,16 @@ const productSchema = new Schema(
             type: Number,
             min: [1, 'Quantity must be at least 1'],
         },
+        name: {
+            type: String,
+            required: true,
+        },
     },
     { _id: false }
 );
 
 const orderSchema = new Schema<IOrder>(
     {
-        user: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
-        },
         products: {
             type: [productSchema],
             validate: {
@@ -43,6 +42,20 @@ const orderSchema = new Schema<IOrder>(
         },
         address: {
             type: String,
+            trim: true,
+        },
+        name: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        email: {
+            type: String,
+            trim: true,
+        },
+        contact: {
+            type: String,
+            required: true,
             trim: true,
         },
     },

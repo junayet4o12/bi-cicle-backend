@@ -3,18 +3,10 @@ import AppError from "../../errors/AppError";
 import Product from "../product/product.model";
 import { IOrder, TOrderStatus } from "./order.interface";
 import Order from "./order.model";
-import mongoose, { startSession, Types } from 'mongoose';
+import { startSession} from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
-import { TUserRole } from '../user/user.interface';
-import { User } from '../user/user.model';
 
-const createOrderIntoDB = async (userData: { email: string; role: TUserRole }, orderData: IOrder) => {
-    const userId = await User.findOne(userData).select({ _id: 1 }).lean();
-
-    if (!userId?._id) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
-    }
-    orderData.user = userId?._id
+const createOrderIntoDB = async ( orderData: IOrder) => {
     const products = orderData.products
     const productsId = products.map(item => item.product);
     const productsData = await Product.find({ _id: { $in: productsId } });

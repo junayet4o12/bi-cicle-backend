@@ -6,8 +6,10 @@ import catchAsync from '../../utils/catchAsync';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
     const { email, role } = req.user;
+    console.log(req.user);
+
     const orderData = req.body;
-    const result = await OrderServices.createOrderIntoDB({ email, role }, orderData);
+    const result = await OrderServices.createOrderIntoDB( orderData);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
