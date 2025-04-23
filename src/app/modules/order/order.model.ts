@@ -18,6 +18,10 @@ const productSchema = new Schema<IOrderedProduct>(
             type: String,
             required: true,
         },
+        price: {
+            type: Number,
+            required: true,
+        },
     },
     { _id: false }
 );
@@ -61,30 +65,13 @@ const orderSchema = new Schema<IOrder>(
     },
     {
         timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     }
 );
 
-orderSchema.post('find', async function (docs) {
-    for (const doc of docs) {
-        // Calculate total price for each populated order
-        doc.totalPrice = calculateTotalPrice(doc.products);
-        await doc.save(); // Save the updated totalPrice
-    }
-});
-
-orderSchema.post('findOne', async function (doc) {
-    if (doc) {
-        doc.totalPrice = calculateTotalPrice(doc.products);
-        await doc.save();
-    }
-});
-
-// Ensure `totalPrice` is recalculated after findOneAndUpdate, update, and updateMany
-orderSchema.post('findOneAndUpdate', async function (doc) {
-    if (doc) {
-        doc.totalPrice = calculateTotalPrice(doc.products);
-        await doc.save();
-    }
+orderSchema.virtual('totalPrice').get(function (this: IOrder) {
+    return calculateTotalPrice(this.products);
 });
 
 const Order = model<IOrder>('Order', orderSchema);

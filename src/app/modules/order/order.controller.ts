@@ -5,11 +5,8 @@ import sendResponse from "../../utils/sendResponse";
 import catchAsync from '../../utils/catchAsync';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-    const { email, role } = req.user;
-    console.log(req.user);
-
     const orderData = req.body;
-    const result = await OrderServices.createOrderIntoDB( orderData);
+    const result = await OrderServices.createOrderIntoDB(orderData);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -30,7 +27,19 @@ const calculateTotalRevenue = catchAsync(async (req: Request, res: Response) => 
 
 const getAllOrders = catchAsync(async (req: Request, res: Response) => {
     const query = req.query;
-    const result = await OrderServices.getAllProductsFromDB(query);
+    const result = await OrderServices.getAllOrdersFromDB(query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Orders retrieved successfully",
+        data: result.result,
+        meta: result.meta,
+    });
+});
+const getMyOrders = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query;
+    const { email } = req.user
+    const result = await OrderServices.getMyOrdersFromDB(email, query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -42,7 +51,7 @@ const getAllOrders = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleOrder = catchAsync(async (req: Request, res: Response) => {
     const { orderId } = req.params;
-    const result = await OrderServices.getAllSingleProductFromDB(orderId);
+    const result = await OrderServices.getSingleOrderFromDB(orderId);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -54,7 +63,7 @@ const getSingleOrder = catchAsync(async (req: Request, res: Response) => {
 const updateOrder = catchAsync(async (req: Request, res: Response) => {
     const { orderId } = req.params;
     const data = req.body;
-    const result = await OrderServices.updateProductIntoDB(orderId, data);
+    const result = await OrderServices.updateOrderIntoDB(orderId, data);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -93,5 +102,6 @@ export const OrderControllers = {
     getSingleOrder,
     updateOrder,
     updateOrderStatus,
-    deleteOrder
+    deleteOrder,
+    getMyOrders
 };

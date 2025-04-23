@@ -5,6 +5,7 @@ export interface IOrderedProduct {
     product: Types.ObjectId;
     quantity: number;
     name: string;
+    price: number;
 }
 export interface IOrder {
     products: IOrderedProduct[];

@@ -8,6 +8,7 @@ const router = Router();
 
 router.post('', validateRequest(OrderValidations.createOrderValidationSchema), OrderControllers.createOrder);
 router.get('', auth('admin'), OrderControllers.getAllOrders);
+router.get('/my-orders', auth('admin', 'user'), OrderControllers.getMyOrders);
 router.get('/revenue', auth('admin'), OrderControllers.calculateTotalRevenue);
 router.get('/:orderId', auth('admin', 'user'), OrderControllers.getSingleOrder);
 router.patch('/:orderId', auth('admin'), validateRequest(OrderValidations.updateOrderValidationSchema), OrderControllers.updateOrder);

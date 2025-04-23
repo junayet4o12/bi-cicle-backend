@@ -1,12 +1,13 @@
+import { IProduct } from './../product/product.interface';
 import httpStatus from 'http-status';
 import AppError from "../../errors/AppError";
 import Product from "../product/product.model";
 import { IOrder, TOrderStatus } from "./order.interface";
 import Order from "./order.model";
-import { startSession} from 'mongoose';
+import { startSession } from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 
-const createOrderIntoDB = async ( orderData: IOrder) => {
+const createOrderIntoDB = async (orderData: IOrder) => {
     const products = orderData.products
     const productsId = products.map(item => item.product);
     const productsData = await Product.find({ _id: { $in: productsId } });
@@ -22,16 +23,18 @@ const createOrderIntoDB = async ( orderData: IOrder) => {
 
     // checking isAll Product is in Stock 
     newProducts.forEach(item => {
-        const productFullData = productsData.find(data => data._id.toString() === item.product.toString());
+        const productFullData = productsData.find(data => data._id.toString() === item.product.toString()) as IProduct
         if (productFullData?.quantity as number < item.quantity) {
             throw new AppError(httpStatus.BAD_REQUEST, `${productFullData?.name} is not available for ${item.quantity}. Available: ${productFullData?.quantity} pieces!`)
         }
-        return item
+        return item.price = productFullData.price
     });
+
+
+
     let totalPrice = 0;
     newProducts.forEach(item => {
-        const productFullData = productsData.find(data => data._id.toString() === item.product.toString());
-        totalPrice = totalPrice + (item.quantity * (productFullData?.price || 0) as number);
+        totalPrice = totalPrice + (item.quantity * item.price);
         return item
     });
     if (totalPrice > orderData.payment) {
@@ -110,20 +113,29 @@ const calculateRevenueFromDB = async () => {
 
     return result[0]
 }
-const getAllProductsFromDB = async (query: Record<string, unknown>) => {
-    const orderQuery = new QueryBuilder(Order.find(), query).fields().filter().paginate().sort();
-    const result = await orderQuery.modelQuery.populate('user').populate('products.product');
+const getAllOrdersFromDB = async (query: Record<string, unknown>) => {
+    const orderQuery = new QueryBuilder(Order.find(), query).fields().filter().paginate().sort().search(['email', 'contact', 'name', 'address']);
+    const result = await orderQuery.modelQuery.populate('products.product');
     const meta = await orderQuery.countTotal();
     return {
         result,
         meta
     }
 }
-const getAllSingleProductFromDB = async (id: string) => {
-    const result = await Order.findById(id).populate('user').populate('products.product');
+const getMyOrdersFromDB = async (email: string, query: Record<string, unknown>) => {    
+    const orderQuery = new QueryBuilder(Order.find({email: email}), query).fields().filter().paginate().sort().search(['email', 'contact', 'name', 'address']);
+    const result = await orderQuery.modelQuery.populate('products.product');
+    const meta = await orderQuery.countTotal();
+    return {
+        result,
+        meta
+    }
+}
+const getSingleOrderFromDB = async (id: string) => {
+    const result = await Order.findById(id).populate('products.product');
     return result
 }
-const updateProductIntoDB = async (id: string, payload: Partial<Pick<IOrder, 'address' | 'payment'>>) => {
+const updateOrderIntoDB = async (id: string, payload: Partial<Pick<IOrder, 'address' | 'payment'>>) => {
     const result = await Order.findByIdAndUpdate(id, payload, { new: true });
     return result
 }
@@ -163,9 +175,10 @@ const deleteOrderFromDB = async (id: string) => {
 export const OrderServices = {
     createOrderIntoDB,
     calculateRevenueFromDB,
-    getAllProductsFromDB,
-    getAllSingleProductFromDB,
-    updateProductIntoDB,
+    getAllOrdersFromDB,
+    getSingleOrderFromDB,
+    updateOrderIntoDB,
     updateOrderStatus,
-    deleteOrderFromDB
+    deleteOrderFromDB,
+    getMyOrdersFromDB
 }
