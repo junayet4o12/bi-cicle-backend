@@ -66,8 +66,6 @@ const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response)
         });
 }
 
-
-
 const calculateRevenueFromDB = async () => {
     const result = await Order.aggregate([
 
@@ -124,10 +122,16 @@ const getMyOrdersFromDB = async (email: string, query: Record<string, unknown>) 
         meta
     }
 }
+
 const getSingleOrderFromDB = async (id: string) => {
     const result = await Order.findById(id).populate('products.product');
     return result
 }
+const getSingleOrderByTranIdFromDB = async (tranId: string) => {
+    const result = await Order.findOne({transactionId: tranId}).populate('products.product');
+    return result
+}
+
 const updateOrderIntoDB = async (id: string, payload: Partial<Pick<IOrder, 'address' | 'payment'>>) => {
     const result = await Order.findByIdAndUpdate(id, payload, { new: true });
     return result
@@ -173,5 +177,6 @@ export const OrderServices = {
     updateOrderStatus,
     deleteOrderFromDB,
     getMyOrdersFromDB,
-    checkout
+    checkout,
+    getSingleOrderByTranIdFromDB
 }

@@ -10,6 +10,7 @@ router.get('', auth('admin'), OrderControllers.getAllOrders);
 router.get('/my-orders', auth('admin', 'user'), OrderControllers.getMyOrders);
 router.get('/revenue', auth('admin'), OrderControllers.calculateTotalRevenue);
 router.get('/:orderId', auth('admin', 'user'), OrderControllers.getSingleOrder);
+router.get('/success/:tranId', OrderControllers.getSingleOrderByTranId);
 router.patch('/:orderId', auth('admin'), validateRequest(OrderValidations.updateOrderValidationSchema), OrderControllers.updateOrder);
 router.patch('/status/:orderId', auth('admin'), validateRequest(OrderValidations.changeStatusValidationSchema), OrderControllers.updateOrderStatus);
 router.delete('/:orderId', auth('admin'), OrderControllers.deleteOrder);

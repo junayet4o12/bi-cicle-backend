@@ -54,6 +54,16 @@ const getSingleOrder = catchAsync(async (req: Request, res: Response) => {
         data: result,
     });
 });
+const getSingleOrderByTranId = catchAsync(async (req: Request, res: Response) => {
+    const { tranId } = req.params;
+    const result = await OrderServices.getSingleOrderByTranIdFromDB(tranId);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Order retrieved successfully",
+        data: result,
+    });
+});
 
 const updateOrder = catchAsync(async (req: Request, res: Response) => {
     const { orderId } = req.params;
@@ -98,5 +108,6 @@ export const OrderControllers = {
     updateOrderStatus,
     deleteOrder,
     getMyOrders,
-    checkout
+    checkout,
+    getSingleOrderByTranId
 };
