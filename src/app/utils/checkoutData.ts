@@ -28,7 +28,7 @@ export const checkoutData = ({
         product_category: 'Electronic',
         product_profile: 'general',
         cus_name: name,
-        cus_email: email || '',
+        cus_email: email || 'example@gmail.com',
         cus_add1: address,
         cus_add2: 'Dhaka',
         cus_city: 'Dhaka',
