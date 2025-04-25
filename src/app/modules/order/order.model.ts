@@ -62,6 +62,15 @@ const orderSchema = new Schema<IOrder>(
             required: true,
             trim: true,
         },
+        transactionId: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        paidStatus: {
+            type: Boolean,
+            default: false
+        }
     },
     {
         timestamps: true,

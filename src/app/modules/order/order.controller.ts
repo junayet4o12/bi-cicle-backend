@@ -4,15 +4,10 @@ import { OrderServices } from "./order.service";
 import sendResponse from "../../utils/sendResponse";
 import catchAsync from '../../utils/catchAsync';
 
-const createOrder = catchAsync(async (req: Request, res: Response) => {
-    const orderData = req.body;
-    const result = await OrderServices.createOrderIntoDB(orderData);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Order has been created successfully",
-        data: result,
-    });
+const checkout = catchAsync(async (req: Request, res: Response) => {
+    const orderData = req.body; 
+    await OrderServices.checkout(orderData, res);
+    
 });
 
 const calculateTotalRevenue = catchAsync(async (req: Request, res: Response) => {
@@ -96,12 +91,12 @@ const deleteOrder = catchAsync(async (req: Request, res: Response) => {
 
 
 export const OrderControllers = {
-    createOrder,
     calculateTotalRevenue,
     getAllOrders,
     getSingleOrder,
     updateOrder,
     updateOrderStatus,
     deleteOrder,
-    getMyOrders
+    getMyOrders,
+    checkout
 };

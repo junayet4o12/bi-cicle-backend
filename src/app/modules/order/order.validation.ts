@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { order_status } from './order.const';
 
-const createOrderValidationSchema = z.object({
+const checkoutValidationSchema = z.object({
     body: z.object({
         products: z.array(
             z.object({
@@ -21,7 +21,7 @@ const createOrderValidationSchema = z.object({
             .email({ message: "Please enter a valid email address" })
             .or(z.literal(""))
             .optional(),
-        contact: z.string({ required_error: 'Contact is Required' })
+        contact: z.string({ required_error: 'Contact is Required' }),
     }),
 });
 
@@ -52,7 +52,7 @@ const changeStatusValidationSchema = z.object({
 });
 
 export const OrderValidations = {
-    createOrderValidationSchema,
     updateOrderValidationSchema,
-    changeStatusValidationSchema
+    changeStatusValidationSchema,
+    checkoutValidationSchema
 };

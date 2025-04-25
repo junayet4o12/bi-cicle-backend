@@ -15,4 +15,6 @@ export interface IOrder {
     name: string;
     email?: string;
     contact: string;
+    transactionId: string;
+    paidStatus: boolean;
 }
