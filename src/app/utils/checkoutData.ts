@@ -14,7 +14,7 @@ export const checkoutData = ({
     address
 }: DataType) => {
     const tran_id = `TRX-${Date.now()}`;
-    const backendUrl = 'http://localhost:5000'
+    const backendUrl = config.backend_url
     const data = {
         total_amount: totalPrice,
         currency: 'BDT',
