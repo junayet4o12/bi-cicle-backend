@@ -41,8 +41,6 @@ const orderSchema = new Schema<IOrder>(
         },
         payment: {
             type: Number,
-            min: [0, 'Payment amount cannot be negative'],
-            required: true
         },
         address: {
             type: String,
@@ -73,6 +71,10 @@ const orderSchema = new Schema<IOrder>(
             type: String,
             enum: paymentMethod,
             required: true,
+        },
+        deliveryCharge: {
+            type: Number,
+            required: true
         }
     },
     {

@@ -13,7 +13,6 @@ const checkoutValidationSchema = z.object({
         status: z.enum(Object.keys(order_status) as [keyof typeof order_status], {
             invalid_type_error: `Status must be one of ${Object.keys(order_status).join(', ')}`,
         }).default('PENDING').optional(),
-        payment: z.number().min(0, 'Payment amount cannot be negative'),
         address: z.string().trim().min(5, 'Address must be at least 5 characters long'),
         name: z.string({ required_error: 'Name is Required!' }),
         paymentMethod: z.enum(paymentMethod, {

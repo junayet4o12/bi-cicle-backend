@@ -10,7 +10,7 @@ export interface IOrderedProduct {
 export interface IOrder {
     products: IOrderedProduct[];
     status?: TOrderStatus;
-    payment: number;
+    payment?: number;
     address: string;
     name: string;
     email?: string;
@@ -18,4 +18,5 @@ export interface IOrder {
     transactionId?: string;
     paidStatus: boolean;
     paymentMethod: typeof paymentMethod[number] ;
+    deliveryCharge: number;
 }

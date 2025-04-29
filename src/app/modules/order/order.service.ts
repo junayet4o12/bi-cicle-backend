@@ -14,7 +14,7 @@ import { checkoutData } from '../../utils/checkoutData';
 import { createOrder } from './order.utils';
 const store_id = config.ssl_store_id
 const store_passwd = config.ssl_secret_key
-const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response) => {
+const checkout = async (orderData: Omit<IOrder, 'transactiondId'>, res: Response) => {
 
     const productsId = orderData.products.map(item => item.product);
     const productsData = await Product.find({ _id: { $in: productsId } });
@@ -34,17 +34,19 @@ const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response)
     if (newProducts.length < 1) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Products not available!');
     }
-
+    const deliveryCharge = 120
     orderData.products = newProducts;
     orderData.status = 'PENDING';
+    orderData.deliveryCharge = deliveryCharge;
     const totalPrice = newProducts.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
 
 
 
     if (orderData.paymentMethod === 'Cash On Delivery') {
+        orderData.payment = 0;
         const result = await createOrder(orderData, newProducts);
-        
+
 
         sendResponse(res, {
             statusCode: httpStatus.OK,
@@ -57,7 +59,7 @@ const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response)
 
     const data = checkoutData({
         totalPrice, name: orderData.name, address: orderData.address, email: orderData
-            ?.email || ''
+            ?.email || '', deliveryCharge
     })
 
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, false);
@@ -69,6 +71,7 @@ const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response)
                 message: "checkout url has sent",
                 data: apiResponse.GatewayPageURL,
             });
+            orderData.payment = totalPrice + deliveryCharge
             const result = await createOrder(orderData, newProducts, data.tran_id)
             return result
         })

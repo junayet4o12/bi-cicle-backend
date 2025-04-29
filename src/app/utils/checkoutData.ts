@@ -2,6 +2,7 @@ import config from "../config";
 
 type DataType = {
     totalPrice: number;
+    deliveryCharge: number;
     name: string;
     email?: string;
     address: string
@@ -9,6 +10,7 @@ type DataType = {
 
 export const checkoutData = ({
     totalPrice,
+    deliveryCharge,
     name,
     email,
     address
@@ -16,7 +18,7 @@ export const checkoutData = ({
     const tran_id = `TRX-${Date.now()}`;
     const backendUrl = config.backend_url
     const data = {
-        total_amount: totalPrice,
+        total_amount: totalPrice + deliveryCharge,
         currency: 'BDT',
         tran_id: tran_id, // use unique tran_id for each api call
         success_url: `${backendUrl}/checkout/success/${tran_id}`,
