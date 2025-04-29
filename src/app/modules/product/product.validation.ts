@@ -16,6 +16,7 @@ const createProductValidationSchema = z.object({
         quantity: z.number().min(0, "Quantity must be a non-negative number"),
         description: z.string().max(500, "Description must not exceed 500 characters"),
         images: z.array(z.string()).min(1, "At least one image is required."),
+       
         specifications: z.array(
             z.object({
                 key: z.string(),

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { IProduct } from "./product.interface";
 import Product from "./product.model"
@@ -15,9 +16,10 @@ const createProductsIntoDB = async (productData: IProduct) => {
     const result = Product.create(productData);
     return result;
 }
-const getSingleProductFromDB = async (productId: string) => {
-    const result = await Product.findById(productId);
-    return result
+const getSingleProductFromDB = async (productId: string, query: Record<string, unknown>) => {
+    const productQuery = new QueryBuilder(Product.find({ _id: new Types.ObjectId(productId) }), query).fields()
+    const result = await productQuery.modelQuery;
+    return result[0]
 }
 const updateSingleProductOfDB = async ({ productId, data }: TUpdatedProduct) => {
 

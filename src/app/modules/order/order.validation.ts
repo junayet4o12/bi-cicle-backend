@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { order_status } from './order.const';
+import { order_status, paymentMethod } from './order.const';
 
 const checkoutValidationSchema = z.object({
     body: z.object({
@@ -16,6 +16,9 @@ const checkoutValidationSchema = z.object({
         payment: z.number().min(0, 'Payment amount cannot be negative'),
         address: z.string().trim().min(5, 'Address must be at least 5 characters long'),
         name: z.string({ required_error: 'Name is Required!' }),
+        paymentMethod: z.enum(paymentMethod, {
+            invalid_type_error: "Payment method must be one of Cash on Delivery or Online Payment",
+        }),
         email: z
             .string()
             .email({ message: "Please enter a valid email address" })

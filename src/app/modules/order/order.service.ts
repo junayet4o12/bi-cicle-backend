@@ -1,5 +1,4 @@
 import { IProduct } from './../product/product.interface';
-import axios from 'axios'
 import httpStatus from 'http-status';
 import AppError from "../../errors/AppError";
 import Product from "../product/product.model";
@@ -12,9 +11,11 @@ import SSLCommerzPayment from "sslcommerz-lts";
 import { Response, Router } from 'express';
 import sendResponse from '../../utils/sendResponse';
 import { checkoutData } from '../../utils/checkoutData';
+import { createOrder } from './order.utils';
 const store_id = config.ssl_store_id
 const store_passwd = config.ssl_secret_key
 const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response) => {
+
     const productsId = orderData.products.map(item => item.product);
     const productsData = await Product.find({ _id: { $in: productsId } });
 
@@ -39,27 +40,37 @@ const checkout = async (orderData: Omit<IOrder, 'transactionId'>, res: Response)
     const totalPrice = newProducts.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
 
-    const is_live = false //true for live, false for sandbox
+
+
+    if (orderData.paymentMethod === 'Cash On Delivery') {
+        const result = await createOrder(orderData, newProducts);
+        
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Order has Created.",
+            data: result,
+        });
+        return
+    }
+
     const data = checkoutData({
         totalPrice, name: orderData.name, address: orderData.address, email: orderData
             ?.email || ''
     })
 
-    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, false);
     sslcz.init(data)
-        .then((apiResponse: any) => {
+        .then(async (apiResponse: any) => {
             sendResponse(res, {
                 statusCode: httpStatus.OK,
                 success: true,
                 message: "checkout url has sent",
                 data: apiResponse.GatewayPageURL,
             });
-            const finalOrder: IOrder = {
-                ...orderData,
-                transactionId: data.tran_id,
-                paidStatus: false
-            }
-            const result = Order.create(finalOrder)
+            const result = await createOrder(orderData, newProducts, data.tran_id)
+            return result
         })
         .catch(() => {
             throw new AppError(httpStatus.BAD_GATEWAY, 'Payment initialization failed.')
@@ -128,7 +139,7 @@ const getSingleOrderFromDB = async (id: string) => {
     return result
 }
 const getSingleOrderByTranIdFromDB = async (tranId: string) => {
-    const result = await Order.findOne({transactionId: tranId}).populate('products.product');
+    const result = await Order.findOne({ transactionId: tranId }).populate('products.product');
     return result
 }
 

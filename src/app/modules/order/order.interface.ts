@@ -1,5 +1,5 @@
 import {  Types } from 'mongoose';
-import { order_status } from './order.const';
+import { order_status, paymentMethod } from './order.const';
 export type TOrderStatus = keyof typeof order_status
 export interface IOrderedProduct {
     product: Types.ObjectId;
@@ -15,6 +15,7 @@ export interface IOrder {
     name: string;
     email?: string;
     contact: string;
-    transactionId: string;
+    transactionId?: string;
     paidStatus: boolean;
+    paymentMethod: typeof paymentMethod[number] ;
 }

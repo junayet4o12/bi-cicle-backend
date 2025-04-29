@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { IOrder, IOrderedProduct } from "./order.interface";
-import { order_status } from './order.const';
+import { order_status, paymentMethod } from './order.const';
 import { calculateTotalPrice } from "../../utils/calculateTotalPrice";
 
 const productSchema = new Schema<IOrderedProduct>(
@@ -64,12 +64,15 @@ const orderSchema = new Schema<IOrder>(
         },
         transactionId: {
             type: String,
-            required: true,
-            unique: true,
         },
         paidStatus: {
             type: Boolean,
             default: false
+        },
+        paymentMethod: {
+            type: String,
+            enum: paymentMethod,
+            required: true,
         }
     },
     {

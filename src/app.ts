@@ -20,7 +20,7 @@ app.get('/', (req: Request, res: Response) => {
 app.post('/checkout/success/:tranId', async (req, res) => {
     const tranId = req.params.tranId
     await Order.findOneAndUpdate({ transactionId: tranId }, { $set: { paidStatus: true } }, { new: true })
-    res.redirect(`${frontend_url}/checkout/success/${tranId}`)
+    res.redirect(`${frontend_url}/checkout/OP/success/${tranId}`)
 })
 
 
