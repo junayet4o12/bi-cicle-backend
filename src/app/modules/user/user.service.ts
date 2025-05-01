@@ -10,7 +10,7 @@ const createUserIntoDB = async (data: IUser) => {
 }
 
 const getAllUserFromDB = async (query: Record<string, unknown>) => {
-    const userQuery = new QueryBuilder(User.find(), query).fields().filter().paginate().search(['name', 'email']);
+    const userQuery = new QueryBuilder(User.find(), query).fields().filter().paginate().search(['name', 'email', 'contactNumber', 'address']);
     const result = await userQuery.modelQuery;
     const meta = await userQuery.countTotal();
     return { meta, result }
