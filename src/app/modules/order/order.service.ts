@@ -80,44 +80,7 @@ const checkout = async (orderData: Omit<IOrder, 'transactiondId'>, res: Response
         });
 }
 
-const calculateRevenueFromDB = async () => {
-    const result = await Order.aggregate([
 
-        {
-            $unwind: '$products'
-        },
-        {
-            $addFields: { productDetails: { $toObjectId: '$products.product' } }
-        },
-        {
-            $lookup: {
-                from: 'products',
-                localField: 'productDetails',
-                foreignField: '_id',
-                as: 'productDetails',
-            }
-        },
-        { $unwind: '$productDetails' },
-        {
-            $group: {
-                _id: null,
-                totalRevenue: {
-                    $sum: { $multiply: ['$products.quantity', '$productDetails.price'] }
-                }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                totalRevenue: 1
-            }
-        }
-
-
-    ])
-
-    return result[0]
-}
 const getAllOrdersFromDB = async (query: Record<string, unknown>) => {
     const orderQuery = new QueryBuilder(Order.find(), query).fields().filter().paginate().sort().search(['email', 'contact', 'name', 'address']);
     const result = await orderQuery.modelQuery.populate('products.product');
@@ -184,7 +147,6 @@ const deleteOrderFromDB = async (id: string) => {
 }
 
 export const OrderServices = {
-    calculateRevenueFromDB,
     getAllOrdersFromDB,
     getSingleOrderFromDB,
     updateOrderIntoDB,

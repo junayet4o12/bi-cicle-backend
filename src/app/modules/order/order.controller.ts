@@ -10,15 +10,7 @@ const checkout = catchAsync(async (req: Request, res: Response) => {
     
 });
 
-const calculateTotalRevenue = catchAsync(async (req: Request, res: Response) => {
-    const result = await OrderServices.calculateRevenueFromDB();
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Revenue calculated successfully",
-        data: result,
-    });
-});
+
 
 const getAllOrders = catchAsync(async (req: Request, res: Response) => {
     const query = req.query;
@@ -101,7 +93,6 @@ const deleteOrder = catchAsync(async (req: Request, res: Response) => {
 
 
 export const OrderControllers = {
-    calculateTotalRevenue,
     getAllOrders,
     getSingleOrder,
     updateOrder,
