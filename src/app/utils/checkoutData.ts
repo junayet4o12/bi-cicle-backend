@@ -22,8 +22,8 @@ export const checkoutData = ({
         currency: 'BDT',
         tran_id: tran_id, // use unique tran_id for each api call
         success_url: `${backendUrl}/checkout/success/${tran_id}`,
-        fail_url: `${backendUrl}/checkout/fail`,
-        cancel_url: `${backendUrl}/checkout/cancel`,
+        fail_url: `${backendUrl}/checkout/fail/${tran_id}`,
+        cancel_url: `${backendUrl}/checkout/cancel/${tran_id}`,
         ipn_url: `${backendUrl}/checkout/ipn`,
         shipping_method: 'Courier',
         product_name: 'Computer.',

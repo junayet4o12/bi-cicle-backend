@@ -192,5 +192,5 @@ export const OrderServices = {
     deleteOrderFromDB,
     getMyOrdersFromDB,
     checkout,
-    getSingleOrderByTranIdFromDB
+    getSingleOrderByTranIdFromDB,
 }
