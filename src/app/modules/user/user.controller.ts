@@ -62,8 +62,10 @@ const updateByData = catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "My data has updated!", data: result });
 })
 const toggleUserState = catchAsync(async (req, res) => {
+    const { email, role } = req.user
+    const queryData = { email, role }
     const id = req.params.id;
-    const result = await UserServices.toggleUserStatus(id);
+    const result = await UserServices.toggleUserStatus(id, queryData);
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "User status has toggled!", data: result });
 })
 

@@ -40,6 +40,11 @@ const userSchema = new Schema<IUser, IUserModel>({
         enum: ["user", 'admin'],
         default: 'user'
     },
+    isSuperAdmin: {
+        type: Boolean,
+        default: false,
+        select: 0
+    },
     isBlock: {
         type: Boolean,
         default: false

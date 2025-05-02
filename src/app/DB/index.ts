@@ -10,10 +10,11 @@ const admin: IUser = {
     password: config.super_admin_default_password as string,
     role: user_role.admin,
     isBlock: false,
+    isSuperAdmin: true
 }
 
 const seedAdmin = async () => {
-    const isAdminExist = await User.findOne({ role: user_role.admin });
+    const isAdminExist = await User.findOne({ isSuperAdmin: true });
     if (!isAdminExist) {
         await User.create(admin)
     }

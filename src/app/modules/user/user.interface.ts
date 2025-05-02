@@ -13,6 +13,7 @@ export interface IUser {
     contactNumber: string;
     isBlock?: boolean;
     passwordChangedAt?: Date;
+    isSuperAdmin?:boolean;
 }
 
 export interface IUserCheckingOptions {
