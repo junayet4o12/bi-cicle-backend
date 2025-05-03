@@ -1,4 +1,7 @@
 import Order from "../order/order.model";
+import { User } from "../user/user.model";
+
+// ------------------ Helper Aggregation Pipelines ------------------
 
 const totalRevenueAggregateOperations = [
     { $unwind: "$products" },
@@ -18,16 +21,34 @@ const totalRevenueAggregateOperations = [
     }
 ];
 
-const calculateRevenueFromDB = async () => {
-    // Total Revenue (All Time)
-    const totalRevenue = await Order.aggregate(totalRevenueAggregateOperations);
+const monthSyntax = {
+    $concat: [
+        { $toString: "$_id.year" },
+        "-",
+        {
+            $cond: [
+                { $lt: ["$_id.month", 10] },
+                { $concat: ["0", { $toString: "$_id.month" }] },
+                { $toString: "$_id.month" }
+            ]
+        }
+    ]
+};
 
-    // Dates for Last Month
+const calculatePercentChange = (previous: number, current: number) => {
+    if (previous <= 0) return 0;
+    return ((current - previous) / previous) * 100;
+};
+
+// ------------------ Main Analytics Function ------------------
+
+const analyzeOrders = async () => {
     const now = new Date();
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    const totalRevenueAtLastMonth = await Order.aggregate([
+    const [currentRevenue] = await Order.aggregate(totalRevenueAggregateOperations);
+    const [lastMonthRevenue] = await Order.aggregate([
         {
             $match: {
                 createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth }
@@ -36,20 +57,18 @@ const calculateRevenueFromDB = async () => {
         ...totalRevenueAggregateOperations
     ]);
 
-    const currentTotal = totalRevenue[0]?.totalRevenue || 0;
-    const lastMonthTotal = totalRevenueAtLastMonth[0]?.totalRevenue || 0;
+    const currentTotalRevenue = currentRevenue?.totalRevenue || 0;
+    const lastMonthTotalRevenue = lastMonthRevenue?.totalRevenue || 0;
 
-    // Calculate Percentage Change
-    let percentageChange = 0;
-    if (lastMonthTotal > 0) {
-        percentageChange = ((currentTotal - lastMonthTotal) / lastMonthTotal) * 100;
-    }
-
-    // Sales Over Time by Month (last 12 months)
-    const last12Months = await Order.aggregate([
+    const last12MonthsOrdersData = await Order.aggregate([
         {
-            $unwind: "$products"
+            $match: {
+                createdAt: {
+                    $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
+                }
+            }
         },
+        { $unwind: "$products" },
         {
             $group: {
                 _id: {
@@ -58,49 +77,106 @@ const calculateRevenueFromDB = async () => {
                 },
                 totalRevenue: {
                     $sum: { $multiply: ["$products.quantity", "$products.price"] }
-                }
+                },
+                orderIds: { $addToSet: "$_id" }
             }
         },
         {
-            $sort: {
-                "_id.year": 1,
-                "_id.month": 1
+            $addFields: {
+                totalOrders: { $size: "$orderIds" }
             }
         },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
         {
             $project: {
                 _id: 0,
-                month: {
-                    $concat: [
-                        { $toString: "$_id.year" },
-                        "-",
-                        {
-                            $cond: [
-                                { $lt: ["$_id.month", 10] },
-                                { $concat: ["0", { $toString: "$_id.month" }] },
-                                { $toString: "$_id.month" }
-                            ]
-                        }
-                    ]
-                },
-                totalRevenue: 1
+                month: monthSyntax,
+                totalRevenue: 1,
+                totalOrders: 1
             }
         }
     ]);
 
-    const topProducts = await Order.aggregate([
-        { $unwind: "$products" },
 
+
+    const totalOrders = await Order.countDocuments();
+    const lastMonthOrders = await Order.countDocuments({
+        createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth }
+    });
+
+    const totalUsers = await User.countDocuments({ role: "user" });
+    const lastMonthUsers = await User.countDocuments({
+        role: "user",
+        createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth }
+    });
+
+    return {
+        revenueData: {
+            total: currentTotalRevenue,
+            lastMonthTotal: lastMonthTotalRevenue,
+            percentageChange: parseFloat(calculatePercentChange(lastMonthTotalRevenue, currentTotalRevenue).toFixed(2))
+        },
+        ordersData: {
+            total: totalOrders,
+            lastMonthTotal: lastMonthOrders,
+            percentageChange: parseFloat(calculatePercentChange(lastMonthOrders, totalOrders).toFixed(2)),
+            overYearData: last12MonthsOrdersData
+        },
+        usersData: {
+            total: totalUsers,
+            lastMonthTotal: lastMonthUsers,
+            percentageChange: parseFloat(calculatePercentChange(lastMonthUsers, totalUsers).toFixed(2))
+        }
+    };
+};
+
+// ------------------ Separate Services ------------------
+
+// ✅ Get last month users
+const getLast12MonthUsersData = async () => {
+    return await User.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
+                },
+                role: "user"
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$createdAt" },
+                    month: { $month: "$createdAt" }
+                },
+                users: { $sum: 1 }
+            }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+        {
+            $project: {
+                _id: 0,
+                users: 1,
+                month: monthSyntax
+            }
+        }
+    ]);
+
+};
+
+// ✅ Get top 10 products
+const getTopTenProducts = async () => {
+    return await Order.aggregate([
+        { $unwind: "$products" },
         {
             $group: {
                 _id: "$products.product",
                 totalQuantitySold: { $sum: "$products.quantity" },
                 totalRevenue: {
                     $sum: { $multiply: ["$products.quantity", "$products.price"] }
-                  }
+                }
             }
         },
-
         {
             $lookup: {
                 from: "products",
@@ -109,9 +185,7 @@ const calculateRevenueFromDB = async () => {
                 as: "productDetails"
             }
         },
-
         { $unwind: "$productDetails" },
-
         {
             $project: {
                 _id: 0,
@@ -121,20 +195,14 @@ const calculateRevenueFromDB = async () => {
                 totalRevenue: 1
             }
         },
-
         { $sort: { totalQuantitySold: -1 } },
         { $limit: 10 }
     ]);
-
-    return {
-        currentTotal,
-        lastMonthTotal,
-        percentageChange: parseFloat(percentageChange.toFixed(2)),
-        salesOverTime: last12Months,
-        topProducts
-    };
 };
 
+
 export const AnalyticsServices = {
-    calculateRevenueFromDB
+    analyzeOrders,
+    getLast12MonthUsersData,
+    getTopTenProducts
 };
