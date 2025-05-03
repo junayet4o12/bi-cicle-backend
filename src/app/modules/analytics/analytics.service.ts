@@ -60,45 +60,6 @@ const analyzeOrders = async () => {
     const currentTotalRevenue = currentRevenue?.totalRevenue || 0;
     const lastMonthTotalRevenue = lastMonthRevenue?.totalRevenue || 0;
 
-    const last12MonthsOrdersData = await Order.aggregate([
-        {
-            $match: {
-                createdAt: {
-                    $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
-                }
-            }
-        },
-        { $unwind: "$products" },
-        {
-            $group: {
-                _id: {
-                    year: { $year: "$createdAt" },
-                    month: { $month: "$createdAt" }
-                },
-                totalRevenue: {
-                    $sum: { $multiply: ["$products.quantity", "$products.price"] }
-                },
-                orderIds: { $addToSet: "$_id" }
-            }
-        },
-        {
-            $addFields: {
-                totalOrders: { $size: "$orderIds" }
-            }
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-        {
-            $project: {
-                _id: 0,
-                month: monthSyntax,
-                totalRevenue: 1,
-                totalOrders: 1
-            }
-        }
-    ]);
-
-
-
     const totalOrders = await Order.countDocuments();
     const lastMonthOrders = await Order.countDocuments({
         createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth }
@@ -119,8 +80,7 @@ const analyzeOrders = async () => {
         ordersData: {
             total: totalOrders,
             lastMonthTotal: lastMonthOrders,
-            percentageChange: parseFloat(calculatePercentChange(lastMonthOrders, totalOrders).toFixed(2)),
-            overYearData: last12MonthsOrdersData
+            percentageChange: parseFloat(calculatePercentChange(lastMonthOrders, totalOrders).toFixed(2))
         },
         usersData: {
             total: totalUsers,
@@ -132,36 +92,94 @@ const analyzeOrders = async () => {
 
 // ------------------ Separate Services ------------------
 
-// ✅ Get last month users
-const getLast12MonthUsersData = async () => {
-    return await User.aggregate([
-        {
-            $match: {
-                createdAt: {
-                    $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
-                },
-                role: "user"
+// ✅ Get last 12 months users, orders, revenue data
+const getLast12MonthsAnalyticsData = async () => {
+    const [users, orders, revenue] = await Promise.all([
+        User.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
+                    },
+                    role: "user"
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    users: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    users: 1,
+                    month: monthSyntax
+                }
             }
-        },
-        {
-            $group: {
-                _id: {
-                    year: { $year: "$createdAt" },
-                    month: { $month: "$createdAt" }
-                },
-                users: { $sum: 1 }
+        ]),
+        Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    orders: { $sum: 1 } // simply count orders directly
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    orders: 1,
+                    month: monthSyntax
+                }
             }
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-        {
-            $project: {
-                _id: 0,
-                users: 1,
-                month: monthSyntax
+        ]),
+        Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 11))
+                    }
+                }
+            },
+            { $unwind: "$products" },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    totalRevenue: {
+                        $sum: { $multiply: ["$products.quantity", "$products.price"] }
+                    }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    totalRevenue: 1,
+                    month: monthSyntax
+                }
             }
-        }
+        ])
     ]);
 
+    return { users, orders, revenue };
 };
 
 // ✅ Get top 10 products
@@ -192,7 +210,9 @@ const getTopTenProducts = async () => {
                 productId: "$_id",
                 name: "$productDetails.name",
                 totalQuantitySold: 1,
-                totalRevenue: 1
+                totalRevenue: 1,
+                images: "$productDetails.images",
+                brand: "$productDetails.brand"
             }
         },
         { $sort: { totalQuantitySold: -1 } },
@@ -200,9 +220,8 @@ const getTopTenProducts = async () => {
     ]);
 };
 
-
 export const AnalyticsServices = {
     analyzeOrders,
-    getLast12MonthUsersData,
+    getLast12MonthsAnalyticsData,
     getTopTenProducts
 };

@@ -15,14 +15,13 @@ const analyzeOrders = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-// 2. Get Last Month Users
-const getLast12MonthUsersData = catchAsync(async (req: Request, res: Response) => {
-    const { startDate, endDate } = req.query; // You can optionally pass startDate and endDate via query params
-    const result = await AnalyticsServices.getLast12MonthUsersData();
+// 2. Get Last 12 Months Analytics Data (Users + Orders + Revenue)
+const getLast12MonthsAnalyticsData = catchAsync(async (req: Request, res: Response) => {
+    const result = await AnalyticsServices.getLast12MonthsAnalyticsData();
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Over Year users data retrieved successfully",
+        message: "Last 12 months analytics data retrieved successfully",
         data: result,
     });
 });
@@ -40,6 +39,6 @@ const getTopTenProducts = catchAsync(async (req: Request, res: Response) => {
 
 export const AnalyticsControllers = {
     analyzeOrders,
-    getLast12MonthUsersData,
+    getLast12MonthsAnalyticsData,
     getTopTenProducts
 };
