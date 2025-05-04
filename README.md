@@ -1,7 +1,7 @@
 # 🚴 Bi-Cycle Store Backend
 
 ## 📌 Overview
-Bi-Cycle Store Backend is a backend application built with **Express.js and TypeScript**, integrating **MongoDB with Mongoose** to manage a bicycle store. The API implements user authentication and authorization with role-based access control for administrators and regular users.
+Bi-Cycle Store Backend is a robust backend application built with **Express.js and TypeScript**, integrating **MongoDB with Mongoose** to manage a bicycle store. The API implements user authentication and authorization with role-based access control for administrators and regular users. Now with integrated payment processing via SSLCommerz!
 
 ## 🌐 Live API Testing
 Test the API endpoints using the deployed version:
@@ -15,10 +15,11 @@ https://bi-cicle-backend.vercel.app/
 - ✅ **Role-Based Access Control** – Different permissions for admin and user roles
 - ✅ **Product Management** – Add, view, update, and delete bicycles
 - ✅ **Order Management** – Place, view, and manage orders
-- ✅ **Revenue Calculation** – Compute total revenue from all orders
+- ✅ **Analytics** – Comprehensive analytics including revenue, top products, and yearly trends
+- ✅ **Payment Integration** – SSLCommerz payment gateway integration for secure checkout
 - ✅ **Password Management** – Change, forget, and reset password functionality
-- ✅ **Cloud Storage** – Integration with cloud services for image storage
-- ✅ **Validation** – Request validation using middleware
+- ✅ **Email Notifications** – Integration with Nodemailer for email alerts
+- ✅ **Validation** – Request validation using Zod middleware
 
 ## 🎯 API Endpoints
 
@@ -46,13 +47,19 @@ https://bi-cicle-backend.vercel.app/
 * **DELETE** `/api/products/:productId` – Delete a product (admin only)
 
 ### 🔹 Orders
-* **POST** `/api/orders` – Create an order (admin only)
 * **GET** `/api/orders` – Get all orders (admin only)
-* **GET** `/api/orders/revenue` – Calculate total revenue (admin only)
-* **GET** `/api/orders/:orderId` – Get a specific order (admin/user)
+* **GET** `/api/orders/my-orders` – Get orders for current user
+* **GET** `/api/orders/:orderId` – Get a specific order
+* **GET** `/api/orders/success/:tranId` – Get order by transaction ID
 * **PATCH** `/api/orders/:orderId` – Update an order (admin only)
 * **PATCH** `/api/orders/status/:orderId` – Update order status (admin only)
 * **DELETE** `/api/orders/:orderId` – Delete an order (admin only)
+* **POST** `/api/orders/checkout` – Process checkout and payment
+
+### 🔹 Analytics
+* **GET** `/api/analytics/analyze-orders` – Get order analytics (admin only)
+* **GET** `/api/analytics/over-year-analytics` – Get 12-month analytics data (admin only)
+* **GET** `/api/analytics/top-selling-products` – Get top 10 selling products (admin only)
 
 ## Prerequisites
 
@@ -87,11 +94,14 @@ JWT_ACCESS_SECRET=your_access_token_secret
 JWT_REFRESH_SECRET=your_refresh_token_secret
 JWT_ACCESS_EXPIRES_IN=1d
 JWT_REFRESH_EXPIRES_IN=365d
-RESET_PASSWORD_UI_LINK=http://your-frontend-url.com
 CLOUD_NAME=your_cloudinary_name
 CLOUD_API_KEY=your_cloudinary_api_key
 CLOUD_API_SECRET=your_cloudinary_api_secret
 SUPER_ADMIN_DEFAULT_PASS=your_admin_default_password
+SSL_STORE_ID=your_sslcommerz_store_id
+SSL_SECRET_KEY=your_sslcommerz_secret_key
+FRONTEND_URL=http://localhost:5173
+BACKEND_URL=http://localhost:5000
 ```
 
 ## Available Scripts
@@ -133,6 +143,7 @@ bi-cycle-store-backend/
 │   │   ├── auth.ts
 │   │   └── validateRequest.ts
 │   ├── modules/
+│   │   ├── analytics/
 │   │   ├── auth/
 │   │   ├── order/
 │   │   ├── product/
@@ -155,16 +166,20 @@ bi-cycle-store-backend/
 - JWT (Authentication)
 - bcrypt (Password hashing)
 - Zod (Schema validation)
-- Cloudinary (Image storage)
+- Nodemailer (Email services)
+- SSLCommerz (Payment gateway)
 - ESLint (Code linting)
+- Cookie Parser
+- CORS
 
 ## Security Features
 
 - JWT-based authentication
 - Password hashing with bcrypt
 - Role-based access control
-- Request validation
-- Password reset flow
+- Request validation with Zod
+- Password reset flow with email notifications
+- Secure payment processing
 
 ## Security Note
 
@@ -174,6 +189,22 @@ For security reasons, it's recommended to:
 - Regularly update dependencies to patch security vulnerabilities
 - Use strong, unique secrets for JWT tokens
 - Implement rate limiting for authentication endpoints
+
+## Payment Integration
+
+The project integrates SSLCommerz payment gateway for handling online payments. The checkout process is streamlined with:
+- Secure payment processing
+- Transaction verification
+- Order status tracking
+- Success/failure handling
+
+## Analytics Features
+
+The backend provides comprehensive analytics capabilities:
+- Order analysis with metrics on sales and revenue
+- 12-month historical data on users, orders, and revenue
+- Top-selling products identification
+- Data visualization support
 
 ## Development
 
