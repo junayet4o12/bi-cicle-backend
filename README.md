@@ -194,7 +194,7 @@ FRONTEND_URL=http://localhost:5173
 BACKEND_URL=http://localhost:5000
 
 # Database
-DB_URL=mongodb+srv://username:password@cluster.mongodb.net/database
+DB_URL=Your_db_url
 
 # Authentication
 BCRYPT_SALT_ROUNDS=12
@@ -204,12 +204,6 @@ JWT_ACCESS_SECRET=your_jwt_access_secret
 JWT_REFRESH_SECRET=your_jwt_refresh_secret
 JWT_ACCESS_EXPIRES_IN=1d
 JWT_REFRESH_EXPIRES_IN=365d
-
-# Cloud Storage
-CLOUD_NAME=your_cloudinary_name
-CLOUD_API_KEY=your_cloudinary_key
-CLOUD_API_SECRET=your_cloudinary_secret
-
 # Payment Gateway
 SSL_STORE_ID=your_sslcommerz_store_id
 SSL_SECRET_KEY=your_sslcommerz_secret_key
