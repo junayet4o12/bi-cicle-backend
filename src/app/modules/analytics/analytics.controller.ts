@@ -27,12 +27,13 @@ const getLast12MonthsAnalyticsData = catchAsync(async (req: Request, res: Respon
 });
 
 // 3. Get Top 10 Products
-const getTopTenProducts = catchAsync(async (req: Request, res: Response) => {
-    const result = await AnalyticsServices.getTopTenProducts();
+const getTopSellingProducts = catchAsync(async (req: Request, res: Response) => {
+    
+    const result = await AnalyticsServices.getTopSellingProducts(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Top 10 products retrieved successfully",
+        message: "Top Selling products retrieved successfully",
         data: result,
     });
 });
@@ -40,5 +41,5 @@ const getTopTenProducts = catchAsync(async (req: Request, res: Response) => {
 export const AnalyticsControllers = {
     analyzeOrders,
     getLast12MonthsAnalyticsData,
-    getTopTenProducts
+    getTopSellingProducts
 };

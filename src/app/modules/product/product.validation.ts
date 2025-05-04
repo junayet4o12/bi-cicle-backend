@@ -14,7 +14,7 @@ const createProductValidationSchema = z.object({
         }),
         wheelSize: z.number().min(10, 'Wheel Size must be minimum 10').max(29, 'Wheel Size must be maximum 29'),
         quantity: z.number().min(0, "Quantity must be a non-negative number"),
-        description: z.string().max(500, "Description must not exceed 500 characters"),
+        description: z.string().max(2500, "Description must not exceed 500 characters"),
         images: z.array(z.string()).min(1, "At least one image is required."),
        
         specifications: z.array(

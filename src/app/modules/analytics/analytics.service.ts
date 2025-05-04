@@ -183,7 +183,9 @@ const getLast12MonthsAnalyticsData = async () => {
 };
 
 // ✅ Get top 10 products
-const getTopTenProducts = async () => {
+const getTopSellingProducts = async (query: Record<string, unknown>) => {
+    const limit = query.limit ? parseInt(query.limit as string) : 10;
+    
     return await Order.aggregate([
         { $unwind: "$products" },
         {
@@ -212,16 +214,17 @@ const getTopTenProducts = async () => {
                 totalQuantitySold: 1,
                 totalRevenue: 1,
                 images: "$productDetails.images",
-                brand: "$productDetails.brand"
+                brand: "$productDetails.brand",
+                price: "$productDetails.price"
             }
         },
         { $sort: { totalQuantitySold: -1 } },
-        { $limit: 10 }
+        { $limit: limit }
     ]);
 };
 
 export const AnalyticsServices = {
     analyzeOrders,
     getLast12MonthsAnalyticsData,
-    getTopTenProducts
+    getTopSellingProducts
 };
