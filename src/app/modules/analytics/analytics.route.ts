@@ -11,6 +11,6 @@ router.get('/analyze-orders', auth('admin'), AnalyticsControllers.analyzeOrders)
 router.get('/over-year-analytics', auth('admin'), AnalyticsControllers.getLast12MonthsAnalyticsData);
 
 // Route for getting top 10 products
-router.get('/top-selling-products', auth('admin'), AnalyticsControllers.getTopSellingProducts);
+router.get('/top-selling-products', AnalyticsControllers.getTopSellingProducts);
 
 export const AnalyticsRoutes = router;
