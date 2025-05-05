@@ -11,7 +11,7 @@ type TUpdateSubscribe = {
 
 export const createSubscribeIntoDB = async (subscribeData: ISubscribe) => {
     // 1. Save to database
-    // const result = await Subscribe.create(subscribeData);
+    const result = await Subscribe.create(subscribeData);
 
     // 2. Send HTML email
     const htmlContent = `
@@ -27,7 +27,7 @@ export const createSubscribeIntoDB = async (subscribeData: ISubscribe) => {
 
     await sendEmail(subscribeData.email, 'Thanks for Subscribing to Cycle Craze Shop!', htmlContent);
 
-    // return result;
+    return result;
 };
 
 const getAllSubscribesFromDB = async (query: Record<string, unknown>) => {
