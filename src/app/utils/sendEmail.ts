@@ -11,11 +11,15 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
         },
     });
 
-    await transporter.sendMail({
-        from: 'muhammadjunayetmaruf@gmail.com', // sender address
-        to: to, // list of receivers
-        subject: subject, // Subject line
-        text: '', // plain text body
-        html: html, // html body
-    });
+    try {
+        await transporter.sendMail({
+            from: 'muhammadjunayetmaruf@gmail.com',
+            to,
+            subject,
+            text: '',
+            html,
+        });
+    } catch (error) {
+        console.error("Error sending email:", error);
+    }
 }

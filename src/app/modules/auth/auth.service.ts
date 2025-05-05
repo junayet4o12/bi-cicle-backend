@@ -105,7 +105,7 @@ const forgetPassword = async (email: string) => {
 
     const resetUILink = `${config.frontend_url}/auth/reset-password?email=${userData?.email}&token=${resetToken}`
 
-    sendEmail(userData?.email as string, resetUILink)
+    sendEmail(userData?.email as string, `Reset your password within 10 mins`, resetUILink)
 }
 
 const resetPassword = async (payload: {
