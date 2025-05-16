@@ -65,14 +65,19 @@ const checkout = async (orderData: Omit<IOrder, 'transactiondId'>, res: Response
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, false);
     sslcz.init(data)
         .then(async (apiResponse: any) => {
+            orderData.payment = totalPrice + deliveryCharge
+            const result = await createOrder(orderData, newProducts, data.tran_id)
+
+            if (!result) {
+                throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Order creation failed after payment initialization.');
+            }
             sendResponse(res, {
                 statusCode: httpStatus.OK,
                 success: true,
                 message: "checkout url has sent",
                 data: apiResponse.GatewayPageURL,
             });
-            orderData.payment = totalPrice + deliveryCharge
-            const result = await createOrder(orderData, newProducts, data.tran_id)
+
             return result
         })
         .catch(() => {
