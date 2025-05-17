@@ -13,5 +13,6 @@ router.get('/:id', auth('admin'), UserControllers.getSingleUsers);
 router.patch('/me', auth('admin', 'user'), validateRequest(UserValidations.updateUserValidationSchema), UserControllers.updateByData);
 router.patch('/:id', auth('admin'), validateRequest(UserValidations.updateUserValidationSchema), UserControllers.updateSingleUser);
 router.patch('/:id/toggle-state', auth('admin'), UserControllers.toggleUserState);
+router.patch('/:id/toggle-role', auth('admin'), UserControllers.toggleUserRole);
 
 export const UserRoutes = router;

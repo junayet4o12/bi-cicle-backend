@@ -32,7 +32,7 @@ const getMeFromDB = async (query: {
     email: string;
     role: TUserRole
 }) => {
-    const result = await User.findOne(query);
+    const result = await User.findOne(query).select('+isSuperAdmin -password');
     return result
 }
 
@@ -76,6 +76,20 @@ const toggleUserStatus = async (id: string, queryData: { email: string; role: TU
     }
 
 }
+const toggleUserRole = async (id: string, queryData: { email: string; role: TUserRole }) => {
+    const myData = await User.findOne(queryData).select('isSuperAdmin -_id').lean();
+    if (!myData?.isSuperAdmin) {
+        throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized!!')
+    } else {
+        const userData = await User.findById(id).select('isSuperAdmin role -_id').lean();
+        if (userData?.isSuperAdmin) {
+            throw new AppError(httpStatus.FORBIDDEN, 'Cannot change role of super admin!!')
+        }
+        const userUpcomingRole = userData?.role === 'user' ? 'admin' : 'user';
+        const result = await User.findByIdAndUpdate(id, { role: userUpcomingRole })
+        return result
+    }
+}
 
 
 export const UserServices = {
@@ -85,5 +99,6 @@ export const UserServices = {
     getMeFromDB,
     updateMyDataIntoDB,
     updateSingleUserFromDB,
-    toggleUserStatus
+    toggleUserStatus,
+    toggleUserRole
 }

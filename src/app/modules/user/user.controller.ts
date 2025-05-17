@@ -68,6 +68,13 @@ const toggleUserState = catchAsync(async (req, res) => {
     const result = await UserServices.toggleUserStatus(id, queryData);
     sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "User status has toggled!", data: result });
 })
+const toggleUserRole= catchAsync(async (req, res) => {
+    const { email, role } = req.user
+    const queryData = { email, role }
+    const id = req.params.id;
+    const result = await UserServices.toggleUserRole(id, queryData);
+    sendResponse(res, { statusCode: httpStatus.OK, success: true, message: "User role has toggled!", data: result });
+})
 
 
 
@@ -80,5 +87,6 @@ export const UserControllers = {
     getMe,
     updateSingleUser,
     updateByData,
-    toggleUserState
+    toggleUserState,
+    toggleUserRole
 }

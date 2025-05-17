@@ -13,7 +13,7 @@ const frontend_url = config.frontend_url
 const app: Application = express();
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: ['https://cycle-craze-frontend.vercel.app'], credentials: true, }))
+app.use(cors({ origin: [frontend_url as string], credentials: true, }))
 app.use('/api', router)
 
 app.get('/', (req: Request, res: Response) => {
